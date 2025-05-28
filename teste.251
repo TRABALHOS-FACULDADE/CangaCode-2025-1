@@ -1,0 +1,12 @@
+program MeuProg
+declarations
+    var integer: a, b;
+endDeclararions
+functions
+    functype void: Soma(intFunc integer: p1, paramType integer: p2)
+        {
+          print p1 + p2
+        }
+    endFunction
+endFunctions
+endProgram
