@@ -1,5 +1,8 @@
 #include <iostream>
 #include <fstream>
+#include <sstream>
+#include "token.cpp"
+
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
@@ -13,5 +16,12 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    std::stringstream buffer;
+    buffer << ifs.rdbuf();
+    std::string source = buffer.str();
+    
+    TokenType currentType = TokenType::VOID;
+    bool isArray = false;
+    
     return 0;
 }

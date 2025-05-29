@@ -1,6 +1,9 @@
 program MeuProg
 declarations
     var integer: a, b;
+
+    a := 3;
+    b := 7;
 endDeclararions
 functions
     functype void: Soma(intFunc integer: p1, paramType integer: p2)
