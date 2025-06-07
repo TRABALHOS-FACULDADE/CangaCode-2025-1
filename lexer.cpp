@@ -12,10 +12,16 @@ public:
     Token nextToken()
     {
 
+        skipWhitespaceAndComments();
+
         if (pos_ >= src_.size())
             return {TokenType::END_OF_FILE, "", line_};
 
         char c = src_[pos_];
+
+        // Identificadores ou palavras-chave
+        if (std::isalpha(c) || c == '_')
+            return identifierOrKeyword();
 
         // Números
         if (std::isdigit(c))
@@ -25,7 +31,7 @@ public:
         if (c == '"' || c == '\'')
             return stringOrChar();
 
-        // Símbolos de um caractere ou combinação (<=, >=, := etc.)
+        // Símbolos de um caractere ou duplo (<=, >=, := etc.)
         return symbol();
     }
 
@@ -33,6 +39,93 @@ private:
     const std::string src_;
     size_t pos_;
     int line_;
+
+    void skipWhitespaceAndComments()
+    {
+        while (pos_ < src_.size())
+        {
+            if (src_[pos_] == ' ' || src_[pos_] == '\t' || src_[pos_] == '\r')
+            {
+                ++pos_;
+            }
+            else if (src_[pos_] == '\n')
+            {
+                ++pos_;
+                ++line_;
+            }
+            else if (src_[pos_] == '/' && pos_ + 1 < src_.size())
+            {
+                if (src_[pos_ + 1] == '/')
+                { // comentário de linha
+                    pos_ += 2;
+                    while (pos_ < src_.size() && src_[pos_] != '\n')
+                        ++pos_;
+                }
+                else if (src_[pos_ + 1] == '*')
+                { // comentário de bloco
+                    pos_ += 2;
+                    while (pos_ + 1 < src_.size() && !(src_[pos_] == '*' && src_[pos_ + 1] == '/'))
+                    {
+
+                        if (src_[pos_] == '\n')
+                            ++line_;
+
+                        ++pos_;
+                    }
+                    pos_ += 2;
+                }
+                else
+                    break;
+            }
+            else
+                break;
+        }
+    }
+
+    Token identifierOrKeyword()
+    {
+        size_t start = pos_;
+
+        while (pos_ < src_.size() &&
+               (std::isalnum(src_[pos_]) || src_[pos_] == '_'))
+            ++pos_;
+
+        std::string lex = src_.substr(start, pos_ - start);
+
+        for (auto &ch : lex)
+            ch = std::toupper(ch);
+
+        static const std::map<std::string, TokenType> kw = {
+            {"PROGRAM", TokenType::PROGRAM},
+            {"DECLARATIONS", TokenType::DECLARATIONS},
+            {"ENDDECLARATIONS", TokenType::ENDDECLARATIONS},
+            {"FUNCTIONS", TokenType::FUNCTIONS},
+            {"ENDFUNCTIONS", TokenType::ENDFUNCTIONS},
+            {"ENDPROGRAM", TokenType::ENDPROGRAM},
+            {"VAR", TokenType::VAR},
+            {"IF", TokenType::IF},
+            {"ELSE", TokenType::ELSE},
+            {"ENDIF", TokenType::ENDIF},
+            {"WHILE", TokenType::WHILE},
+            {"ENDWHILE", TokenType::ENDWHILE},
+            {"RETURN", TokenType::RETURN},
+            {"BREAK", TokenType::BREAK},
+            {"PRINT", TokenType::PRINT},
+            {"REAL", TokenType::REAL},
+            {"INTEGER", TokenType::INTEGER},
+            {"STRING", TokenType::STRING},
+            {"BOOLEAN", TokenType::BOOLEAN},
+            {"CHARACTER", TokenType::CHARACTER},
+            {"VOID", TokenType::VOID},
+            {"FUNCTYPE", TokenType::FUNCTYPE}};
+
+        auto it = kw.find(lex);
+
+        if (it != kw.end())
+            return {it->second, lex, line_};
+
+        return {TokenType::IDENT, lex, line_};
+    }
 
     Token number()
     {
