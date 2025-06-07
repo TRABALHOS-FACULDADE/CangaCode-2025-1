@@ -46,7 +46,6 @@ public:
             {"VOID", TokenType::VOID},
             {"FUNCTYPE", TokenType::FUNCTYPE}};
 
-        // Convert to uppercase for case-insensitive comparison
         std::string upperLex = truncatedLex;
         for (auto &ch : upperLex)
             ch = std::toupper(ch);
