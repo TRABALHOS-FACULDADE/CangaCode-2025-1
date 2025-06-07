@@ -126,6 +126,61 @@ void _teamHeader(std::ofstream &stream)
            << std::endl;
 }
 
+void _generateLexFile(std::string base, std::vector<LexemeRecord> lexemes)
+{
+    std::ofstream lexOut(base + ".LEX");
+
+    _teamHeader(lexOut);
+
+    for (auto &r : lexemes)
+    {
+        lexOut
+            << "Lexeme: " << r.lexeme << ", Código: "
+            << (SymbolTable::tokenTypeToString(r.type)) << ", ÍndiceTabSimb: "
+            << (r.tableIndex > 0 ? std::to_string(r.tableIndex) : "-") << ", Linha: "
+            << r.line << ".\n";
+    }
+    lexOut.close();
+}
+
+void _generateTabFile(std::string base, SymbolTable symtab)
+{
+    std::ofstream tabOut(base + ".TAB");
+
+    std::vector<std::pair<std::string, SymbolTable::SymbolInfo>> syms;
+    for (auto &p : symtab.all())
+        syms.push_back(p);
+    std::sort(syms.begin(), syms.end(),
+              [](auto &a, auto &b)
+              { return a.second.entry < b.second.entry; });
+
+    _teamHeader(tabOut);
+
+    for (size_t i = 0; i < syms.size(); ++i)
+    {
+        auto &p = syms[i];
+        auto &info = p.second;
+        tabOut
+            << "Entrada: " << info.entry << ", Codigo: "
+            << info.atomCode << ", Lexeme: " << info.lexeme << ",\n"
+            << "QtdCharAntesTrunc: " << info.lenBefore << ", QtdCharDepoisTrunc: "
+            << info.lenAfter << ",\n"
+            << "TipoSimb: " << info.type << ", Linhas: {";
+        for (size_t j = 0; j < info.lines.size(); ++j)
+        {
+            if (j)
+                tabOut << ", ";
+            tabOut << info.lines[j];
+        }
+        tabOut << "}.\n";
+        if (i < syms.size() - 1)
+        {
+            tabOut << "----------------------------------------------------------------------------------------------------\n";
+        }
+    }
+    tabOut.close();
+}
+
 int main(int argc, char *argv[])
 {
     if (argc < 2)
@@ -209,7 +264,7 @@ int main(int argc, char *argv[])
                 typeContext.popContext();
             }
             break;
-                }
+        }
 
         if (tok.type != TokenType::IDENT)
         {
@@ -222,54 +277,9 @@ int main(int argc, char *argv[])
     std::string base = (posdot == std::string::npos
                             ? filename
                             : filename.substr(0, posdot));
-    std::ofstream lexOut(base + ".LEX");
 
-    _teamHeader(lexOut);
-
-    for (auto &r : lexemes)
-    {
-        lexOut
-            << "Lexeme: " << r.lexeme << ", Código: "
-            << (SymbolTable::tokenTypeToString(r.type)) << ", ÍndiceTabSimb: "
-            << (r.tableIndex > 0 ? std::to_string(r.tableIndex) : "-") << ", Linha: "
-            << r.line << ".\n";
-    }
-    lexOut.close();
-
-    std::ofstream tabOut(base + ".TAB");
-
-    std::vector<std::pair<std::string, SymbolTable::SymbolInfo>> syms;
-    for (auto &p : symtab.all())
-        syms.push_back(p);
-    std::sort(syms.begin(), syms.end(),
-              [](auto &a, auto &b)
-              { return a.second.entry < b.second.entry; });
-
-    _teamHeader(tabOut);
-
-    for (size_t i = 0; i < syms.size(); ++i)
-    {
-        auto &p = syms[i];
-        auto &info = p.second;
-        tabOut
-            << "Entrada: " << info.entry << ", Codigo: "
-            << info.atomCode << ", Lexeme: " << info.lexeme << ",\n"
-            << "QtdCharAntesTrunc: " << info.lenBefore << ", QtdCharDepoisTrunc: "
-            << info.lenAfter << ",\n"
-            << "TipoSimb: " << info.type << ", Linhas: {";
-        for (size_t j = 0; j < info.lines.size(); ++j)
-        {
-            if (j)
-                tabOut << ", ";
-            tabOut << info.lines[j];
-        }
-        tabOut << "}.\n";
-        if (i < syms.size() - 1)
-        {
-            tabOut << "----------------------------------------------------------------------------------------------------\n";
-        }
-    }
-    tabOut.close();
+    _generateLexFile(filename, lexemes);
+    _generateTabFile(filename, symtab);
 
     std::cout << "Arquivos gerados: " << base << ".LEX e " << base << ".TAB\n";
     return 0;
