@@ -1,0 +1,44 @@
+PROGRAM
+DECLARATIONS
+    VAR
+        i : INTEGER;
+        j : INTEGER;
+        x : INTEGER;
+        y : REAL;
+        result : REAL;
+        res : REAL;
+    ENDDECLARATIONS
+FUNCTIONS
+    FUNCTYPE add : INTEGER
+    (a : INTEGER, b : INTEGER)
+    {
+        RETURN a + b;
+    }
+
+    FUNCTYPE multiply : REAL
+    (a : REAL, b : REAL)
+    {
+        RETURN a * b;
+    }
+
+    FUNCTYPE aobaMEO : VOID
+    ()
+    {
+        PRINT "Aoba MEO";
+    }
+ENDFUNCTIONS
+{
+    PRINT "Testando aritmetica basica:";
+    i := 10;
+    j := 3;
+    res := i % j;
+    PRINT res;
+
+    x := 10;
+    y := 3.14;
+    result := x * y;
+    PRINT result;       // Deve printar: 31.4
+
+    aobaMEO();
+}
+ENDPROGRAM 
