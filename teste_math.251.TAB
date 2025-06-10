@@ -1,0 +1,50 @@
+Código da Equipe: 2
+Componentes:
+    Davih de Andrade Machado Borges Santos; _@aln.senaicimatec.edu.br
+    Felipe Azevedo Ribeiro; _@aln.senaicimatec.edu.br
+    Gabriel Trindade Santana; _@aln.senaicimatec.edu.br
+    Pedro Quadros de Freitas; _@aln.senaicimatec.edu.br
+
+Entrada: 1, Codigo: IDENT, Lexeme: I,
+QtdCharAntesTrunc: 1, QtdCharDepoisTrunc: 1,
+TipoSimb: VD, Linhas: {3, 26, 29}.
+----------------------------------------------------------------------------------------------------
+Entrada: 2, Codigo: IDENT, Lexeme: J,
+QtdCharAntesTrunc: 1, QtdCharDepoisTrunc: 1,
+TipoSimb: IN, Linhas: {4, 27, 28, 29}.
+----------------------------------------------------------------------------------------------------
+Entrada: 3, Codigo: IDENT, Lexeme: X,
+QtdCharAntesTrunc: 1, QtdCharDepoisTrunc: 1,
+TipoSimb: IN, Linhas: {5, 32, 34}.
+----------------------------------------------------------------------------------------------------
+Entrada: 4, Codigo: IDENT, Lexeme: Y,
+QtdCharAntesTrunc: 1, QtdCharDepoisTrunc: 1,
+TipoSimb: IN, Linhas: {6, 33, 34}.
+----------------------------------------------------------------------------------------------------
+Entrada: 5, Codigo: IDENT, Lexeme: RESULT,
+QtdCharAntesTrunc: 6, QtdCharDepoisTrunc: 6,
+TipoSimb: FP, Linhas: {7, 34, 35}.
+----------------------------------------------------------------------------------------------------
+Entrada: 6, Codigo: IDENT, Lexeme: RES,
+QtdCharAntesTrunc: 3, QtdCharDepoisTrunc: 3,
+TipoSimb: FP, Linhas: {8, 29, 30}.
+----------------------------------------------------------------------------------------------------
+Entrada: 7, Codigo: IDENT, Lexeme: TEXTO,
+QtdCharAntesTrunc: 5, QtdCharDepoisTrunc: 5,
+TipoSimb: FP, Linhas: {9}.
+----------------------------------------------------------------------------------------------------
+Entrada: 8, Codigo: IDENT, Lexeme: ADD,
+QtdCharAntesTrunc: 3, QtdCharDepoisTrunc: 3,
+TipoSimb: ST, Linhas: {12}.
+----------------------------------------------------------------------------------------------------
+Entrada: 9, Codigo: IDENT, Lexeme: A,
+QtdCharAntesTrunc: 1, QtdCharDepoisTrunc: 1,
+TipoSimb: FP, Linhas: {13, 15, 19, 21}.
+----------------------------------------------------------------------------------------------------
+Entrada: 10, Codigo: IDENT, Lexeme: B,
+QtdCharAntesTrunc: 1, QtdCharDepoisTrunc: 1,
+TipoSimb: FP, Linhas: {13, 15, 19, 21}.
+----------------------------------------------------------------------------------------------------
+Entrada: 11, Codigo: IDENT, Lexeme: MULTIPLY,
+QtdCharAntesTrunc: 8, QtdCharDepoisTrunc: 8,
+TipoSimb: IN, Linhas: {18}.

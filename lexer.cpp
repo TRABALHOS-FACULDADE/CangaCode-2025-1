@@ -160,6 +160,12 @@ private:
             ++pos_;
         }
 
+        if (pos_ >= src_.size())
+        {
+            throw std::runtime_error("Erro na linha " + std::to_string(line_) +
+                                     ": String nao fechada. Esperava '" + quote + "'");
+        }
+
         std::string lit = src_.substr(start, pos_ - start);
 
         pos_++;

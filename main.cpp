@@ -88,33 +88,6 @@ private:
     std::stack<Context> contextStack_;
 };
 
-double evaluateMathOperation(double left, double right, TokenType op)
-{
-    switch (op)
-    {
-    case TokenType::PLUS:
-        return left + right;
-    case TokenType::MINUS:
-        return left - right;
-    case TokenType::MUL:
-        return left * right;
-    case TokenType::DIV:
-        if (right == 0)
-        {
-            throw std::runtime_error("Nao pode dividir por zero!");
-        }
-        return left / right;
-    case TokenType::MOD:
-        if (right == 0)
-        {
-            throw std::runtime_error("Nao pode dividir por zero!");
-        }
-        return static_cast<int>(left) % static_cast<int>(right);
-    default:
-        throw std::runtime_error("Operador inválido");
-    }
-}
-
 void _teamHeader(std::ofstream &stream)
 {
     stream << "Código da Equipe: 2" << std::endl
@@ -208,7 +181,6 @@ int main(int argc, char *argv[])
     TokenType currentType = TokenType::VOID;
     bool isArray = false;
     std::string lastIdentifier;
-    std::stack<double> valueStack;
 
     while (true)
     {
@@ -264,6 +236,59 @@ int main(int argc, char *argv[])
                 typeContext.popContext();
             }
             break;
+        case TokenType::REAL:
+        case TokenType::INTEGER:
+        case TokenType::STRING:
+        case TokenType::BOOLEAN:
+        case TokenType::CHARACTER:
+        case TokenType::VOID:
+            currentType = tok.type;
+            break;
+
+        case TokenType::IDENT:
+            lastIdentifier = tok.lexeme;
+            int idx = symtab.defineOrGet(tok.lexeme, tok.line, TokenType::IDENT);
+
+            Token nextTok = lexer.nextToken();
+            if (nextTok.type == TokenType::LPAREN)
+            {
+                while (true)
+                {
+                    Token callTok = lexer.nextToken();
+                    if (callTok.type == TokenType::RPAREN)
+                    {
+                        break;
+                    }
+                }
+                lexer.nextToken();
+            }
+            else
+            {
+                std::string typeCode;
+                switch (typeContext.currentContext())
+                {
+                case TypeContext::Context::GLOBAL:
+                    typeCode = "VD";
+                    break;
+                case TypeContext::Context::VARIABLE_DECL:
+                case TypeContext::Context::FUNCTION_PARAMS:
+                    typeCode = TypeContext::mapTypeToCode(currentType, isArray);
+                    break;
+                case TypeContext::Context::FUNCTION_DECL:
+                    typeCode = TypeContext::mapTypeToCode(currentType, false);
+                    break;
+                default:
+                    break;
+                }
+
+                if (!typeCode.empty())
+                {
+                    symtab.setType(tok.lexeme, typeCode);
+                }
+            }
+
+            lexemes.push_back({tok.lexeme, tok.type, idx, tok.line});
+            continue;
         }
 
         if (tok.type != TokenType::IDENT)

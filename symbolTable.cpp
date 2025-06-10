@@ -73,7 +73,7 @@ public:
             info.lexeme = truncatedLex;
             info.lenBefore = (int)lex.size();
             info.lenAfter = (int)truncatedLex.size();
-            info.type = ""; // Será preenchido durante a análise da tabela de símbolos
+            info.type = tokenTypeToString(TokenType::VOID);
             info.lines.push_back(line);
             table_[truncatedLex] = info;
             return info.entry;
