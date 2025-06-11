@@ -62,25 +62,23 @@ public:
                 return "";
             }
         }
-        else
+
+        switch (type)
         {
-            switch (type)
-            {
-            case TokenType::REAL:
-                return "FP";
-            case TokenType::INTEGER:
-                return "IN";
-            case TokenType::STRING:
-                return "ST";
-            case TokenType::CHARACTER:
-                return "CH";
-            case TokenType::BOOLEAN:
-                return "BL";
-            case TokenType::VOID:
-                return "VD";
-            default:
-                return "";
-            }
+        case TokenType::REAL:
+            return "FP";
+        case TokenType::INTEGER:
+            return "IN";
+        case TokenType::STRING:
+            return "ST";
+        case TokenType::CHARACTER:
+            return "CH";
+        case TokenType::BOOLEAN:
+            return "BL";
+        case TokenType::VOID:
+            return "VD";
+        default:
+            return "";
         }
     }
 

@@ -65,6 +65,7 @@ public:
         checkIfIdentifierIsReservedKeyword(truncatedLex, line);
 
         auto it = table_.find(truncatedLex);
+
         if (it == table_.end())
         {
             SymbolInfo info;
@@ -76,15 +77,16 @@ public:
             info.type = tokenTypeToString(TokenType::VOID);
             info.lines.push_back(line);
             table_[truncatedLex] = info;
+
             return info.entry;
         }
-        else
-        {
-            SymbolInfo &info = it->second;
-            if ((int)info.lines.size() < 5 && info.lines.back() != line)
-                info.lines.push_back(line);
-            return info.entry;
-        }
+
+        SymbolInfo &info = it->second;
+
+        if ((int)info.lines.size() < 5 && info.lines.back() != line)
+            info.lines.push_back(line);
+
+        return info.entry;
     }
 
     void setType(const std::string &lex, const std::string &type)
