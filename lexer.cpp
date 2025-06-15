@@ -35,6 +35,11 @@ public:
         return symbol();
     }
 
+    void putBackToken(const Token& tok)
+    {
+        pos_ -= tok.lexeme.size();
+    }
+
 private:
     const std::string src_;
     size_t pos_;
@@ -102,7 +107,9 @@ private:
             {"FUNCTIONS", TokenType::FUNCTIONS},
             {"ENDFUNCTIONS", TokenType::ENDFUNCTIONS},
             {"ENDPROGRAM", TokenType::ENDPROGRAM},
-            {"VAR", TokenType::VAR},
+            {"VARTYPE", TokenType::VARTYPE},
+            {"FUNCTYPE", TokenType::FUNCTYPE},
+            {"PARAMTYPE", TokenType::PARAMTYPE},
             {"IF", TokenType::IF},
             {"ELSE", TokenType::ELSE},
             {"ENDIF", TokenType::ENDIF},
@@ -117,7 +124,8 @@ private:
             {"BOOLEAN", TokenType::BOOLEAN},
             {"CHARACTER", TokenType::CHARACTER},
             {"VOID", TokenType::VOID},
-            {"FUNCTYPE", TokenType::FUNCTYPE}};
+            {"TRUE", TokenType::TRUE},
+            {"FALSE", TokenType::FALSE}};
 
         auto it = kw.find(lex);
 
@@ -229,7 +237,7 @@ private:
         case '>':
             return match2('>', '=', TokenType::GE, TokenType::GT);
         case '=':
-            return match2('=', '=', TokenType::EQ, TokenType::HASH);
+            return match2('=', '=', TokenType::EQ, TokenType::ASSIGN);
         case '!':
             return match2('!', '=', TokenType::NE, TokenType::HASH);
         case '+':
@@ -248,7 +256,8 @@ private:
             ++pos_;
             return {TokenType::MOD, "%", line_};
         default:
-            throw std::runtime_error("Símbolo inesperado na linha " + std::to_string(line_));
+            throw std::runtime_error("Erro na linha " + std::to_string(line_) +
+                                     ": Caractere invalido '" + c + "'");
         }
     }
 };

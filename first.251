@@ -1,0 +1,30 @@
+PROGRAM
+DECLARATIONS
+    varType integer: I, J, X;
+    varType real: Y, RESULT;
+    varType real[]: array1[10], array2[20]
+ENDDECLARATIONS
+FUNCTIONS
+    FUNCTYPE integer: functionName(paramType integer: param1, param2)
+    {
+        if (param1 > 0)
+            return param1
+        else
+            return 0
+        endIf
+    }
+ENDFUNCTIONS
+{
+    PRINT "Testando aritmetica basica:";
+    i := 10;
+    j := 3;
+    j := j + j + j;
+
+    array1 := [1, 2, 3];
+
+    x := 10;
+    y := 3.14;
+    result := x * y;
+    PRINT result;
+}
+ENDPROGRAM 

@@ -29,7 +29,9 @@ public:
             {"FUNCTIONS", TokenType::FUNCTIONS},
             {"ENDFUNCTIONS", TokenType::ENDFUNCTIONS},
             {"ENDPROGRAM", TokenType::ENDPROGRAM},
-            {"VAR", TokenType::VAR},
+            {"VARTYPE", TokenType::VARTYPE},
+            {"FUNCTYPE", TokenType::FUNCTYPE},
+            {"PARAMTYPE", TokenType::PARAMTYPE},
             {"IF", TokenType::IF},
             {"ELSE", TokenType::ELSE},
             {"ENDIF", TokenType::ENDIF},
@@ -44,7 +46,8 @@ public:
             {"BOOLEAN", TokenType::BOOLEAN},
             {"CHARACTER", TokenType::CHARACTER},
             {"VOID", TokenType::VOID},
-            {"FUNCTYPE", TokenType::FUNCTYPE}};
+            {"TRUE", TokenType::TRUE},
+            {"FALSE", TokenType::FALSE}};
 
         std::string upperLex = truncatedLex;
         for (auto &ch : upperLex)
@@ -147,8 +150,12 @@ public:
             return "ENDFUNCTIONS";
         case TokenType::ENDPROGRAM:
             return "ENDPROGRAM";
-        case TokenType::VAR:
-            return "VAR";
+        case TokenType::VARTYPE:
+            return "VARTYPE";
+        case TokenType::FUNCTYPE:
+            return "FUNCTYPE";
+        case TokenType::PARAMTYPE:
+            return "PARAMTYPE";
         case TokenType::IF:
             return "IF";
         case TokenType::ELSE:
@@ -177,8 +184,10 @@ public:
             return "CHARACTER";
         case TokenType::VOID:
             return "VOID";
-        case TokenType::FUNCTYPE:
-            return "FUNCTYPE";
+        case TokenType::TRUE:
+            return "TRUE";
+        case TokenType::FALSE:
+            return "FALSE";
         case TokenType::SEMI:
             return "SEMI";
         case TokenType::COLON:
@@ -230,6 +239,12 @@ public:
         default:
             return std::to_string(int(t));
         }
+    }
+
+    int getIndex(const std::string &lex) const
+    {
+        auto it = table_.find(lex.substr(0, 35));
+        return it != table_.end() ? it->second.entry : -1;
     }
 
 private:

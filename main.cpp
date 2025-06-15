@@ -91,7 +91,7 @@ void _teamHeader(std::ofstream &stream)
     stream << "Código da Equipe: 2" << std::endl
            << "Componentes:" << std::endl
            << "    Davih de Andrade Machado Borges Santos; _@aln.senaicimatec.edu.br" << std::endl
-           << "    Felipe Azevedo Ribeiro; _@aln.senaicimatec.edu.br" << std::endl
+           << "    Felipe Azevedo Ribeiro; felipe.r@aln.senaicimatec.edu.br" << std::endl
            << "    Gabriel Trindade Santana; _@aln.senaicimatec.edu.br" << std::endl
            << "    Pedro Quadros de Freitas; _@aln.senaicimatec.edu.br" << std::endl
            << std::endl;
@@ -203,11 +203,17 @@ int main(int argc, char *argv[])
         case TokenType::ENDFUNCTIONS:
             typeContext.popContext();
             break;
-        case TokenType::VAR:
+        case TokenType::VARTYPE:
             typeContext.pushContext(TypeContext::Context::VARIABLE_DECL);
             break;
         case TokenType::FUNCTYPE:
             typeContext.pushContext(TypeContext::Context::FUNCTION_DECL);
+            break;
+        case TokenType::PARAMTYPE:
+            if (typeContext.currentContext() == TypeContext::Context::FUNCTION_PARAMS)
+            {
+                typeContext.pushContext(TypeContext::Context::VARIABLE_DECL);
+            }
             break;
         case TokenType::LPAREN:
             if (typeContext.currentContext() == TypeContext::Context::FUNCTION_DECL)
@@ -234,6 +240,18 @@ int main(int argc, char *argv[])
                 typeContext.popContext();
             }
             break;
+        case TokenType::COLON:
+            if (typeContext.currentContext() == TypeContext::Context::VARIABLE_DECL)
+            {
+                break;
+            }
+            break;
+        case TokenType::COMMA:
+            if (typeContext.currentContext() == TypeContext::Context::VARIABLE_DECL)
+            {
+                break;
+            }
+            break;
         case TokenType::REAL:
         case TokenType::INTEGER:
         case TokenType::STRING:
@@ -242,68 +260,102 @@ int main(int argc, char *argv[])
         case TokenType::VOID:
             currentType = tok.type;
             break;
-
+        case TokenType::TRUE:
+        case TokenType::FALSE:
+            break;
         case TokenType::IDENT:
             lastIdentifier = tok.lexeme;
             int idx = symtab.defineOrGet(tok.lexeme, tok.line, TokenType::IDENT);
 
             Token nextTok = lexer.nextToken();
-            if (nextTok.type == TokenType::LPAREN)
+            if (nextTok.type == TokenType::LBRACK)
             {
-                while (true)
+                Token sizeTok = lexer.nextToken();
+                if (sizeTok.type != TokenType::INTCONST)
                 {
-                    Token callTok = lexer.nextToken();
-                    if (callTok.type == TokenType::RPAREN)
-                    {
-                        break;
-                    }
+                    throw std::runtime_error("Erro na linha " + std::to_string(tok.line) +
+                                           ": Tamanho do array deve ser uma constante inteira");
                 }
-                lexer.nextToken();
+                Token rbrack = lexer.nextToken();
+                if (rbrack.type != TokenType::RBRACK)
+                {
+                    throw std::runtime_error("Erro na linha " + std::to_string(tok.line) +
+                                           ": Esperava ']' apos tamanho do array");
+                }
             }
             else
             {
-                std::string typeCode;
-                switch (typeContext.currentContext())
-                {
-                case TypeContext::Context::GLOBAL:
-                    typeCode = "VD";
-                    break;
-                case TypeContext::Context::VARIABLE_DECL:
-                case TypeContext::Context::FUNCTION_PARAMS:
-                    typeCode = TypeContext::mapTypeToCode(currentType, isArray);
-                    break;
-                case TypeContext::Context::FUNCTION_DECL:
-                    typeCode = TypeContext::mapTypeToCode(currentType, false);
-                    break;
-                default:
-                    break;
-                }
-
-                if (!typeCode.empty())
-                {
-                    symtab.setType(tok.lexeme, typeCode);
-                }
+                lexer.putBackToken(nextTok);
             }
 
-            lexemes.push_back({tok.lexeme, tok.type, idx, tok.line});
-            continue;
+            if (typeContext.currentContext() == TypeContext::Context::VARIABLE_DECL)
+            {
+                std::string typeCode;
+                if (isArray)
+                {
+                    switch (currentType)
+                    {
+                    case TokenType::REAL:
+                        typeCode = "AF";
+                        break;
+                    case TokenType::INTEGER:
+                        typeCode = "AI";
+                        break;
+                    case TokenType::STRING:
+                        typeCode = "AS";
+                        break;
+                    case TokenType::CHARACTER:
+                        typeCode = "AC";
+                        break;
+                    case TokenType::BOOLEAN:
+                        typeCode = "AB";
+                        break;
+                    default:
+                        typeCode = "VD";
+                    }
+                }
+                else
+                {
+                    switch (currentType)
+                    {
+                    case TokenType::REAL:
+                        typeCode = "FP";
+                        break;
+                    case TokenType::INTEGER:
+                        typeCode = "IN";
+                        break;
+                    case TokenType::STRING:
+                        typeCode = "ST";
+                        break;
+                    case TokenType::CHARACTER:
+                        typeCode = "CH";
+                        break;
+                    case TokenType::BOOLEAN:
+                        typeCode = "BL";
+                        break;
+                    case TokenType::VOID:
+                        typeCode = "VD";
+                        break;
+                    default:
+                        typeCode = "VD";
+                    }
+                }
+                symtab.setType(tok.lexeme, typeCode);
+            }
+            break;
         }
 
-        if (tok.type != TokenType::IDENT)
-        {
-            lexemes.push_back({tok.lexeme, tok.type, -1, tok.line});
-        }
+        LexemeRecord record;
+        record.type = tok.type;
+        record.lexeme = tok.lexeme;
+        record.tableIndex = symtab.getIndex(tok.lexeme);
+        record.line = tok.line;
+        lexemes.push_back(record);
     }
 
-    // >>>>>> Geração dos arquivos .LEX e .TAB <<<<<<
-    auto posdot = filename.find_last_of('.');
-    std::string base = (posdot == std::string::npos
-                            ? filename
-                            : filename.substr(0, posdot));
+    _generateLexFile(filename.substr(0, filename.find_last_of('.')), lexemes);
+    _generateTabFile(filename.substr(0, filename.find_last_of('.')), symtab);
 
-    _generateLexFile(filename, lexemes);
-    _generateTabFile(filename, symtab);
-
-    std::cout << "Arquivos gerados: " << base << ".LEX e " << base << ".TAB\n";
+    std::cout << "Arquivos gerados: " << filename.substr(0, filename.find_last_of('.')) << ".LEX e " << filename.substr(0, filename.find_last_of('.')) << ".TAB\n";
     return 0;
 }

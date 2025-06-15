@@ -9,7 +9,8 @@ enum class TokenType
     FUNCTIONS,
     ENDFUNCTIONS,
     ENDPROGRAM,
-    VAR,
+    VARTYPE,
+    FUNCTYPE,
     IF,
     ELSE,
     ENDIF,
@@ -18,6 +19,9 @@ enum class TokenType
     RETURN,
     BREAK,
     PRINT,
+    PARAMTYPE,
+    TRUE,
+    FALSE,
 
     // Operadores e símbolos
     SEMI,
@@ -50,7 +54,6 @@ enum class TokenType
     BOOLEAN,
     CHARACTER,
     VOID,
-    FUNCTYPE,
 
     // Identificadores e literais
     IDENT,
