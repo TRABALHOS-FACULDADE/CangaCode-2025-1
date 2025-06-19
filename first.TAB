@@ -15,32 +15,28 @@ TipoSimb: IN, Linhas: {3, 20, 21}.
 ----------------------------------------------------------------------------------------------------
 Entrada: 3, Codigo: IDENT, Lexeme: X,
 QtdCharAntesTrunc: 1, QtdCharDepoisTrunc: 1,
-TipoSimb: IN, Linhas: {3, 25, 27}.
+TipoSimb: IN, Linhas: {3, 23, 25}.
 ----------------------------------------------------------------------------------------------------
 Entrada: 4, Codigo: IDENT, Lexeme: Y,
 QtdCharAntesTrunc: 1, QtdCharDepoisTrunc: 1,
-TipoSimb: FP, Linhas: {4, 26, 27}.
+TipoSimb: FP, Linhas: {4, 24, 25}.
 ----------------------------------------------------------------------------------------------------
 Entrada: 5, Codigo: IDENT, Lexeme: RESULT,
 QtdCharAntesTrunc: 6, QtdCharDepoisTrunc: 6,
-TipoSimb: FP, Linhas: {4, 27, 28}.
+TipoSimb: FP, Linhas: {4, 25, 26}.
 ----------------------------------------------------------------------------------------------------
 Entrada: 6, Codigo: IDENT, Lexeme: ARRAY1,
 QtdCharAntesTrunc: 6, QtdCharDepoisTrunc: 6,
-TipoSimb: FP, Linhas: {5, 23}.
+TipoSimb: FP, Linhas: {5}.
 ----------------------------------------------------------------------------------------------------
 Entrada: 7, Codigo: IDENT, Lexeme: ARRAY2,
 QtdCharAntesTrunc: 6, QtdCharDepoisTrunc: 6,
 TipoSimb: FP, Linhas: {5}.
 ----------------------------------------------------------------------------------------------------
-Entrada: 8, Codigo: IDENT, Lexeme: FUNCTIONNAME,
-QtdCharAntesTrunc: 12, QtdCharDepoisTrunc: 12,
+Entrada: 8, Codigo: IDENT, Lexeme: PARAM1,
+QtdCharAntesTrunc: 6, QtdCharDepoisTrunc: 6,
 TipoSimb: VOID, Linhas: {8}.
 ----------------------------------------------------------------------------------------------------
-Entrada: 9, Codigo: IDENT, Lexeme: PARAM1,
+Entrada: 9, Codigo: IDENT, Lexeme: PARAM2,
 QtdCharAntesTrunc: 6, QtdCharDepoisTrunc: 6,
-TipoSimb: IN, Linhas: {8, 10, 11}.
-----------------------------------------------------------------------------------------------------
-Entrada: 10, Codigo: IDENT, Lexeme: PARAM2,
-QtdCharAntesTrunc: 6, QtdCharDepoisTrunc: 6,
-TipoSimb: IN, Linhas: {8}.
+TipoSimb: VOID, Linhas: {8}.

@@ -208,7 +208,73 @@ int main(int argc, char *argv[])
             break;
         case TokenType::FUNCTYPE:
             typeContext.pushContext(TypeContext::Context::FUNCTION_DECL);
-            break;
+            {
+                Token nextTok;
+                do {
+                    nextTok = lexer.nextToken();
+                } while (nextTok.type != TokenType::LPAREN && nextTok.type != TokenType::END_OF_FILE && nextTok.type != TokenType::ENDFUNCTIONS && nextTok.type != TokenType::LBRACE);
+                if (nextTok.type == TokenType::LPAREN) {
+                    
+                    while (true) {
+                        Token paramTok = lexer.nextToken();
+                        if (paramTok.type == TokenType::RPAREN) break;
+                       
+                        if (paramTok.type == TokenType::IDENT) {
+                            int idx = symtab.defineOrGet(paramTok.lexeme, paramTok.line, TokenType::IDENT);
+                            LexemeRecord paramRecord;
+                            paramRecord.type = paramTok.type;
+                            paramRecord.lexeme = paramTok.lexeme;
+                            paramRecord.tableIndex = symtab.getIndex(paramTok.lexeme);
+                            paramRecord.line = paramTok.line;
+                            lexemes.push_back(paramRecord);
+                        }
+                        
+                        else if (paramTok.type != TokenType::RPAREN) {
+                            LexemeRecord paramRecord;
+                            paramRecord.type = paramTok.type;
+                            paramRecord.lexeme = paramTok.lexeme;
+                            paramRecord.tableIndex = -1;
+                            paramRecord.line = paramTok.line;
+                            lexemes.push_back(paramRecord);
+                        }
+                        if (paramTok.type == TokenType::END_OF_FILE || paramTok.type == TokenType::ENDFUNCTIONS) {
+                            throw std::runtime_error("Erro: fim inesperado ao processar parametros da funcao (linha " + std::to_string(tok.line) + ")");
+                        }
+                    }
+                    
+                    nextTok = lexer.nextToken();
+                }
+
+                while (nextTok.type != TokenType::LBRACE && nextTok.type != TokenType::END_OF_FILE && nextTok.type != TokenType::ENDFUNCTIONS) {
+                    
+                    LexemeRecord skippedRecord;
+                    skippedRecord.type = nextTok.type;
+                    skippedRecord.lexeme = nextTok.lexeme;
+                    skippedRecord.tableIndex = -1;
+                    skippedRecord.line = nextTok.line;
+                    lexemes.push_back(skippedRecord);
+                    nextTok = lexer.nextToken();
+                }
+                if (nextTok.type != TokenType::LBRACE) {
+                    throw std::runtime_error("Erro: funcao nao possui corpo iniciado por '{' (linha " + std::to_string(tok.line) + ")");
+                }
+                
+                int braceCount = 1;
+                while (braceCount > 0) {
+                    Token bodyTok = lexer.nextToken();
+                    if (bodyTok.type == TokenType::END_OF_FILE) {
+                        throw std::runtime_error("Erro: funcao nao termina com '}' (linha " + std::to_string(tok.line) + ")");
+                    }
+                    if (bodyTok.type == TokenType::LBRACE) braceCount++;
+                    if (bodyTok.type == TokenType::RBRACE) braceCount--;
+                    if (bodyTok.type == TokenType::ENDFUNCTIONS && braceCount > 0) {
+                        throw std::runtime_error("Erro: funcao nao termina com '}' antes de ENDFUNCTIONS (linha " + std::to_string(tok.line) + ")");
+                    }
+                }
+                
+                typeContext.popContext();
+                break;
+            }
         case TokenType::PARAMTYPE:
             if (typeContext.currentContext() == TypeContext::Context::FUNCTION_PARAMS)
             {

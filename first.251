@@ -20,8 +20,6 @@ ENDFUNCTIONS
     j := 3;
     j := j + j + j;
 
-    array1 := [1, 2, 3];
-
     x := 10;
     y := 3.14;
     result := x * y;
