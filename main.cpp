@@ -325,6 +325,24 @@ int main(int argc, char *argv[])
         case TokenType::CHARACTER:
         case TokenType::VOID:
             currentType = tok.type;
+            {
+                if (currentType != TokenType::VOID) {
+                    Token lookahead = lexer.nextToken();
+                    if (lookahead.type == TokenType::LBRACK) {
+                        Token lookahead2 = lexer.nextToken();
+                        if (lookahead2.type == TokenType::RBRACK) {
+                            isArray = true;
+                        } else {
+                            lexer.putBackToken(lookahead2);
+                            lexer.putBackToken(lookahead);
+                            isArray = false;
+                        }
+                    } else {
+                        lexer.putBackToken(lookahead);
+                        isArray = false;
+                    }
+                }
+            }
             break;
         case TokenType::TRUE:
         case TokenType::FALSE:

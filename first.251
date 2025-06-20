@@ -2,7 +2,9 @@ PROGRAM
 DECLARATIONS
     varType integer: I, J, X;
     varType real: Y, RESULT;
-    varType real[]: array1[10], array2[20]
+    varType real[]: array1[10], array2[20];
+    varType character: m, n, o;
+    varType character[]: k;
 ENDDECLARATIONS
 FUNCTIONS
     FUNCTYPE integer: functionName(paramType integer: param1, param2)

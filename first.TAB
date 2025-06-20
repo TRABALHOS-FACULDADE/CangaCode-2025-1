@@ -7,36 +7,52 @@ Componentes:
 
 Entrada: 1, Codigo: IDENT, Lexeme: I,
 QtdCharAntesTrunc: 1, QtdCharDepoisTrunc: 1,
-TipoSimb: IN, Linhas: {3, 19}.
+TipoSimb: IN, Linhas: {3, 21}.
 ----------------------------------------------------------------------------------------------------
 Entrada: 2, Codigo: IDENT, Lexeme: J,
 QtdCharAntesTrunc: 1, QtdCharDepoisTrunc: 1,
-TipoSimb: IN, Linhas: {3, 20, 21}.
+TipoSimb: IN, Linhas: {3, 22, 23}.
 ----------------------------------------------------------------------------------------------------
 Entrada: 3, Codigo: IDENT, Lexeme: X,
 QtdCharAntesTrunc: 1, QtdCharDepoisTrunc: 1,
-TipoSimb: IN, Linhas: {3, 23, 25}.
+TipoSimb: IN, Linhas: {3, 25, 27}.
 ----------------------------------------------------------------------------------------------------
 Entrada: 4, Codigo: IDENT, Lexeme: Y,
 QtdCharAntesTrunc: 1, QtdCharDepoisTrunc: 1,
-TipoSimb: FP, Linhas: {4, 24, 25}.
+TipoSimb: FP, Linhas: {4, 26, 27}.
 ----------------------------------------------------------------------------------------------------
 Entrada: 5, Codigo: IDENT, Lexeme: RESULT,
 QtdCharAntesTrunc: 6, QtdCharDepoisTrunc: 6,
-TipoSimb: FP, Linhas: {4, 25, 26}.
+TipoSimb: FP, Linhas: {4, 27, 28}.
 ----------------------------------------------------------------------------------------------------
 Entrada: 6, Codigo: IDENT, Lexeme: ARRAY1,
 QtdCharAntesTrunc: 6, QtdCharDepoisTrunc: 6,
-TipoSimb: FP, Linhas: {5}.
+TipoSimb: AF, Linhas: {5}.
 ----------------------------------------------------------------------------------------------------
 Entrada: 7, Codigo: IDENT, Lexeme: ARRAY2,
 QtdCharAntesTrunc: 6, QtdCharDepoisTrunc: 6,
-TipoSimb: FP, Linhas: {5}.
+TipoSimb: AF, Linhas: {5}.
 ----------------------------------------------------------------------------------------------------
-Entrada: 8, Codigo: IDENT, Lexeme: PARAM1,
-QtdCharAntesTrunc: 6, QtdCharDepoisTrunc: 6,
-TipoSimb: VOID, Linhas: {8}.
+Entrada: 8, Codigo: IDENT, Lexeme: M,
+QtdCharAntesTrunc: 1, QtdCharDepoisTrunc: 1,
+TipoSimb: CH, Linhas: {6}.
 ----------------------------------------------------------------------------------------------------
-Entrada: 9, Codigo: IDENT, Lexeme: PARAM2,
+Entrada: 9, Codigo: IDENT, Lexeme: N,
+QtdCharAntesTrunc: 1, QtdCharDepoisTrunc: 1,
+TipoSimb: CH, Linhas: {6}.
+----------------------------------------------------------------------------------------------------
+Entrada: 10, Codigo: IDENT, Lexeme: O,
+QtdCharAntesTrunc: 1, QtdCharDepoisTrunc: 1,
+TipoSimb: CH, Linhas: {6}.
+----------------------------------------------------------------------------------------------------
+Entrada: 11, Codigo: IDENT, Lexeme: K,
+QtdCharAntesTrunc: 1, QtdCharDepoisTrunc: 1,
+TipoSimb: AC, Linhas: {7}.
+----------------------------------------------------------------------------------------------------
+Entrada: 12, Codigo: IDENT, Lexeme: PARAM1,
 QtdCharAntesTrunc: 6, QtdCharDepoisTrunc: 6,
-TipoSimb: VOID, Linhas: {8}.
+TipoSimb: VOID, Linhas: {10}.
+----------------------------------------------------------------------------------------------------
+Entrada: 13, Codigo: IDENT, Lexeme: PARAM2,
+QtdCharAntesTrunc: 6, QtdCharDepoisTrunc: 6,
+TipoSimb: VOID, Linhas: {10}.
