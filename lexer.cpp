@@ -105,6 +105,7 @@ private:
             {"DECLARATIONS", TokenType::DECLARATIONS},
             {"ENDDECLARATIONS", TokenType::ENDDECLARATIONS},
             {"FUNCTIONS", TokenType::FUNCTIONS},
+            {"ENDFUNCTION", TokenType::ENDFUNCTION},
             {"ENDFUNCTIONS", TokenType::ENDFUNCTIONS},
             {"ENDPROGRAM", TokenType::ENDPROGRAM},
             {"VARTYPE", TokenType::VARTYPE},

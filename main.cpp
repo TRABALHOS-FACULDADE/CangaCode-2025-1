@@ -214,11 +214,9 @@ int main(int argc, char *argv[])
                     nextTok = lexer.nextToken();
                 } while (nextTok.type != TokenType::LPAREN && nextTok.type != TokenType::END_OF_FILE && nextTok.type != TokenType::ENDFUNCTIONS && nextTok.type != TokenType::LBRACE);
                 if (nextTok.type == TokenType::LPAREN) {
-                    
                     while (true) {
                         Token paramTok = lexer.nextToken();
                         if (paramTok.type == TokenType::RPAREN) break;
-                       
                         if (paramTok.type == TokenType::IDENT) {
                             int idx = symtab.defineOrGet(paramTok.lexeme, paramTok.line, TokenType::IDENT);
                             LexemeRecord paramRecord;
@@ -227,9 +225,7 @@ int main(int argc, char *argv[])
                             paramRecord.tableIndex = symtab.getIndex(paramTok.lexeme);
                             paramRecord.line = paramTok.line;
                             lexemes.push_back(paramRecord);
-                        }
-                        
-                        else if (paramTok.type != TokenType::RPAREN) {
+                        } else if (paramTok.type != TokenType::RPAREN) {
                             LexemeRecord paramRecord;
                             paramRecord.type = paramTok.type;
                             paramRecord.lexeme = paramTok.lexeme;
@@ -241,12 +237,9 @@ int main(int argc, char *argv[])
                             throw std::runtime_error("Erro: fim inesperado ao processar parametros da funcao (linha " + std::to_string(tok.line) + ")");
                         }
                     }
-                    
                     nextTok = lexer.nextToken();
                 }
-
                 while (nextTok.type != TokenType::LBRACE && nextTok.type != TokenType::END_OF_FILE && nextTok.type != TokenType::ENDFUNCTIONS) {
-                    
                     LexemeRecord skippedRecord;
                     skippedRecord.type = nextTok.type;
                     skippedRecord.lexeme = nextTok.lexeme;
@@ -258,7 +251,6 @@ int main(int argc, char *argv[])
                 if (nextTok.type != TokenType::LBRACE) {
                     throw std::runtime_error("Erro: funcao nao possui corpo iniciado por '{' (linha " + std::to_string(tok.line) + ")");
                 }
-                
                 int braceCount = 1;
                 while (braceCount > 0) {
                     Token bodyTok = lexer.nextToken();
@@ -271,7 +263,10 @@ int main(int argc, char *argv[])
                         throw std::runtime_error("Erro: funcao nao termina com '}' antes de ENDFUNCTIONS (linha " + std::to_string(tok.line) + ")");
                     }
                 }
-                
+                Token endFuncTok = lexer.nextToken();
+                if (endFuncTok.type != TokenType::ENDFUNCTION) {
+                    throw std::runtime_error("Erro: funcao deve terminar com ENDFUNCTION (linha " + std::to_string(tok.line) + ")");
+                }
                 typeContext.popContext();
                 break;
             }

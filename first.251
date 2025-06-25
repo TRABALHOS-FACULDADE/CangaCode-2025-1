@@ -7,7 +7,7 @@ DECLARATIONS
     varType character[]: k;
 ENDDECLARATIONS
 FUNCTIONS
-    FUNCTYPE integer: functionName(paramType integer: param1, param2)
+    FUNCTYPE integer: condicionais(paramType integer: param1, param2)
     {
         if (param1 > 0)
             return param1
@@ -15,9 +15,16 @@ FUNCTIONS
             return 0
         endIf
     }
+    ENDFUNCTION
+    
+    FUNCTYPE integer: soma(paramType integer: param1, param2)
+    {
+        return param1 + param2;
+    }
+    ENDFUNCTION
 ENDFUNCTIONS
 {
-    PRINT "Testando aritmetica basica:";
+    PRINT "/**/ Testando aritmetica basica: //";
     i := 10;
     j := 3;
     j := j + j + j;
