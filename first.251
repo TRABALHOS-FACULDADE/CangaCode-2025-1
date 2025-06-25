@@ -29,6 +29,11 @@ ENDFUNCTIONS
     j := 3;
     j := j + j + j;
 
+    WHILE (j < 3) {
+        PRINT "Hello";
+    }
+    ENDWHILE
+
     x := 10;
     y := 3.14;
     result := x * y;

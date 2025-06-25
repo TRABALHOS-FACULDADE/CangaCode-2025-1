@@ -342,7 +342,7 @@ int main(int argc, char *argv[])
         case TokenType::TRUE:
         case TokenType::FALSE:
             break;
-        case TokenType::IDENT:
+        case TokenType::IDENT: {
             lastIdentifier = tok.lexeme;
             int idx = symtab.defineOrGet(tok.lexeme, tok.line, TokenType::IDENT);
 
@@ -422,6 +422,66 @@ int main(int argc, char *argv[])
                 symtab.setType(tok.lexeme, typeCode);
             }
             break;
+        }
+        case TokenType::WHILE: {
+            
+            Token nextTok = lexer.nextToken();
+            if (nextTok.type != TokenType::LPAREN) {
+                throw std::runtime_error("Erro: WHILE deve ser seguido de '(' (linha " + std::to_string(tok.line) + ")");
+            }
+            
+            int parenCount = 1;
+            while (parenCount > 0) {
+                Token condTok = lexer.nextToken();
+                if (condTok.type == TokenType::END_OF_FILE) {
+                    throw std::runtime_error("Erro: WHILE sem fechamento de ')' (linha " + std::to_string(tok.line) + ")");
+                }
+                if (condTok.type == TokenType::LPAREN) parenCount++;
+                if (condTok.type == TokenType::RPAREN) parenCount--;
+                
+                if (condTok.type == TokenType::IDENT) {
+                    symtab.defineOrGet(condTok.lexeme, condTok.line, TokenType::IDENT);
+                }
+            }
+            
+            Token braceTok = lexer.nextToken();
+            if (braceTok.type != TokenType::LBRACE) {
+                throw std::runtime_error("Erro: WHILE deve ter bloco iniciado por '{' (linha " + std::to_string(tok.line) + ")");
+            }
+            
+            int braceCount = 1;
+            while (braceCount > 0) {
+                Token bodyTok = lexer.nextToken();
+                if (bodyTok.type == TokenType::END_OF_FILE) {
+                    throw std::runtime_error("Erro: WHILE sem fechamento de '}' (linha " + std::to_string(tok.line) + ")");
+                }
+                if (bodyTok.type == TokenType::LBRACE) braceCount++;
+                if (bodyTok.type == TokenType::RBRACE) braceCount--;
+                
+                if (bodyTok.type == TokenType::IDENT) {
+                    symtab.defineOrGet(bodyTok.lexeme, bodyTok.line, TokenType::IDENT);
+                }
+                LexemeRecord record;
+                record.type = bodyTok.type;
+                record.lexeme = bodyTok.lexeme;
+                record.tableIndex = symtab.getIndex(bodyTok.lexeme);
+                record.line = bodyTok.line;
+                lexemes.push_back(record);
+            }
+            
+            Token endWhileTok = lexer.nextToken();
+            if (endWhileTok.type != TokenType::ENDWHILE) {
+                throw std::runtime_error("Erro: WHILE deve terminar com ENDWHILE (linha " + std::to_string(tok.line) + ")");
+            }
+            
+            LexemeRecord record;
+            record.type = endWhileTok.type;
+            record.lexeme = endWhileTok.lexeme;
+            record.tableIndex = symtab.getIndex(endWhileTok.lexeme);
+            record.line = endWhileTok.line;
+            lexemes.push_back(record);
+            break;
+        }
         }
 
         LexemeRecord record;
