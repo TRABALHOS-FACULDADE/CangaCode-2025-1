@@ -17,11 +17,24 @@ FUNCTIONS
     }
     ENDFUNCTION
     
-    FUNCTYPE integer: soma(paramType integer: param1, param2)
+    FUNCTYPE integer: soma(paramType integer: a, b)
     {
-        return param1 + param2;
+        return a + b;
     }
     ENDFUNCTION
+    
+    FUNCTYPE string: abc(paramType real: d, r; paramType string: s, t)
+    {
+        return d + s;
+    }
+    ENDFUNCTION
+
+    FUNCTYPE real: func(paramType integer: arr[10], u; paramType real: values[5])
+    {
+        return u + arr + values;
+    }
+    ENDFUNCTION
+
 ENDFUNCTIONS
 {
     PRINT "/**/ Testando aritmetica basica: //";

@@ -238,7 +238,7 @@ int main(int argc, char *argv[])
                 // Espera ':' após o tipo
                 Token colonTok = lexer.nextToken();
                 if (colonTok.type != TokenType::COLON) {
-                    throw std::runtime_error("Erro: Esperado ':' apos o tipo na declaracao de função (linha " + std::to_string(tok.line) + ")");
+                    throw std::runtime_error("Erro: Esperado ':' apos o tipo na declaracao de funcao (linha " + std::to_string(tok.line) + ")");
                 }
                 // Processa o nome da função, parâmetros e corpo
                 Token nextTok = lexer.nextToken();
@@ -246,34 +246,131 @@ int main(int argc, char *argv[])
                     nextTok = lexer.nextToken();
                 } while (nextTok.type != TokenType::LPAREN && nextTok.type != TokenType::END_OF_FILE && nextTok.type != TokenType::ENDFUNCTIONS && nextTok.type != TokenType::LBRACE);
                 if (nextTok.type == TokenType::LPAREN) {
-                    // Processa parâmetros
-                    while (true) {
-                        Token paramTok = lexer.nextToken();
-                        if (paramTok.type == TokenType::RPAREN) break;
-                        if (paramTok.type == TokenType::IDENT) {
-                            int idx = symtab.defineOrGet(paramTok.lexeme, paramTok.line, TokenType::IDENT);
-                            LexemeRecord paramRecord;
-                            paramRecord.type = paramTok.type;
-                            paramRecord.lexeme = paramTok.lexeme;
-                            paramRecord.tableIndex = symtab.getIndex(paramTok.lexeme);
-                            paramRecord.line = paramTok.line;
-                            lexemes.push_back(paramRecord);
-                        } else if (paramTok.type != TokenType::RPAREN) {
-                            LexemeRecord paramRecord;
-                            paramRecord.type = paramTok.type;
-                            paramRecord.lexeme = paramTok.lexeme;
-                            paramRecord.tableIndex = -1;
-                            paramRecord.line = paramTok.line;
-                            lexemes.push_back(paramRecord);
-                        }
-                        if (paramTok.type == TokenType::END_OF_FILE || paramTok.type == TokenType::ENDFUNCTIONS) {
-                            throw std::runtime_error("Erro: fim inesperado ao processar parametros da funcao (linha " + std::to_string(tok.line) + ")");
+                    // Processa parâmetros seguindo a BNF: <Parameters> ::= <ParamTypeList> | "?"
+                    Token paramStartTok = lexer.nextToken();
+                    if (paramStartTok.type == TokenType::QUESTION) {
+                        // Parâmetros vazios (?)
+                        LexemeRecord paramRecord;
+                        paramRecord.type = paramStartTok.type;
+                        paramRecord.lexeme = paramStartTok.lexeme;
+                        paramRecord.tableIndex = -1;
+                        paramRecord.line = paramStartTok.line;
+                        lexemes.push_back(paramRecord);
+                    } else {
+                        // Processa lista de parâmetros
+                        lexer.putBackToken(paramStartTok);
+                        
+                        while (true) {
+                            Token paramTok = lexer.nextToken();
+                            if (paramTok.type == TokenType::RPAREN) {
+                                lexer.putBackToken(paramTok);
+                                break;
+                            }
+                            if (paramTok.type == TokenType::PARAMTYPE) {
+                                // Espera tipo do parâmetro
+                                Token paramTypeTok = lexer.nextToken();
+                                TokenType paramType = paramTypeTok.type;
+                                
+                                // Verifica se é um tipo válido
+                                if (paramTypeTok.type != TokenType::REAL && paramTypeTok.type != TokenType::INTEGER && 
+                                    paramTypeTok.type != TokenType::STRING && paramTypeTok.type != TokenType::BOOLEAN && 
+                                    paramTypeTok.type != TokenType::CHARACTER && paramTypeTok.type != TokenType::VOID) {
+                                    throw std::runtime_error("Erro: Tipo invalido para parametro (linha " + std::to_string(paramTypeTok.line) + ")");
+                                }
+                               
+                                // Espera ':'
+                                Token paramColonTok = lexer.nextToken();
+                                if (paramColonTok.type != TokenType::COLON) {
+                                    throw std::runtime_error("Erro: Esperado ':' apos o tipo do parametro (linha " + std::to_string(paramTypeTok.line) + ")");
+                                }
+                                
+                                // Processa lista de parâmetros
+                                while (true) {
+                                    Token paramIdentTok = lexer.nextToken();
+                                    if (paramIdentTok.type == TokenType::IDENT) {
+                                
+                                        int idx = symtab.defineOrGet(paramIdentTok.lexeme, paramIdentTok.line, TokenType::IDENT);
+                                        
+                                        // Verifica se é array
+                                        Token nextParamTok = lexer.nextToken();
+                                        
+                                        bool isParamArray = false;
+                                        
+                                        if (nextParamTok.type == TokenType::LBRACK) {
+                                            Token sizeTok = lexer.nextToken();
+                                            
+                                            if (sizeTok.type != TokenType::INTCONST) {
+                                                throw std::runtime_error("Erro: Tamanho do array deve ser constante inteira (linha " + std::to_string(sizeTok.line) + ")");
+                                            }
+                                            Token rbrack = lexer.nextToken();
+                                            
+                                            if (rbrack.type != TokenType::RBRACK) {
+                                                throw std::runtime_error("Erro: Esperado ']' apos tamanho do array (linha " + std::to_string(sizeTok.line) + ")");
+                                            }
+                                            
+                                            isParamArray = true;
+                                        } else {
+                                            lexer.putBackToken(nextParamTok);
+                                        }
+                                        
+                                        // Define o tipo correto do parâmetro na tabela de símbolos
+                                        std::string typeCode = TypeContext::mapTypeToCode(paramType, isParamArray);
+                                        symtab.setType(paramIdentTok.lexeme, typeCode);
+                                        
+                                        LexemeRecord paramRecord;
+                                        paramRecord.type = paramIdentTok.type;
+                                        paramRecord.lexeme = paramIdentTok.lexeme;
+                                        paramRecord.tableIndex = symtab.getIndex(paramIdentTok.lexeme);
+                                        paramRecord.line = paramIdentTok.line;
+                                        lexemes.push_back(paramRecord);
+                                    } else if (paramIdentTok.type == TokenType::COMMA) {
+                                        continue;
+                                    } else if (paramIdentTok.type == TokenType::SEMI) {
+                                        // Fim deste grupo de parâmetros, continua para o próximo grupo
+                                        break;
+                                    } else if (paramIdentTok.type == TokenType::RPAREN) {
+                                        // Fim de todos os parâmetros
+                                        lexer.putBackToken(paramIdentTok);
+                                        break;
+                                    } else {
+                                        // Se não for identificador, vírgula, ponto e vírgula ou parêntese, volta o token e sai do loop
+                                        lexer.putBackToken(paramIdentTok);
+                                        break;
+                                    }
+                                }
+                            } else if (paramTok.type == TokenType::IDENT) {
+                                // Só identificador, sem tipo explícito
+                                
+                                int idx = symtab.defineOrGet(paramTok.lexeme, paramTok.line, TokenType::IDENT);
+                                
+                                LexemeRecord paramRecord;
+                                
+                                paramRecord.type = paramTok.type;
+                                paramRecord.lexeme = paramTok.lexeme;
+                                paramRecord.tableIndex = symtab.getIndex(paramTok.lexeme);
+                                paramRecord.line = paramTok.line;
+                                lexemes.push_back(paramRecord);
+                            } else if (paramTok.type != TokenType::RPAREN) {
+                                LexemeRecord paramRecord;
+                                
+                                paramRecord.type = paramTok.type;
+                                paramRecord.lexeme = paramTok.lexeme;
+                                paramRecord.tableIndex = -1;
+                                paramRecord.line = paramTok.line;
+                                lexemes.push_back(paramRecord);
+                            }
+                            if (paramTok.type == TokenType::END_OF_FILE || paramTok.type == TokenType::ENDFUNCTIONS) {
+                                
+                                throw std::runtime_error("Erro: fim inesperado ao processar parametros da funcao (linha " + std::to_string(tok.line) + ")");
+                            }
                         }
                     }
                     nextTok = lexer.nextToken();
                 }
+
                 // Pula tokens até encontrar o início do corpo da função
                 while (nextTok.type != TokenType::LBRACE && nextTok.type != TokenType::END_OF_FILE && nextTok.type != TokenType::ENDFUNCTIONS) {
+                    
                     LexemeRecord skippedRecord;
                     skippedRecord.type = nextTok.type;
                     skippedRecord.lexeme = nextTok.lexeme;
@@ -282,22 +379,30 @@ int main(int argc, char *argv[])
                     lexemes.push_back(skippedRecord);
                     nextTok = lexer.nextToken();
                 }
+                
                 if (nextTok.type != TokenType::LBRACE) {
                     throw std::runtime_error("Erro: funcao nao possui corpo iniciado por '{' (linha " + std::to_string(tok.line) + ")");
                 }
+                
                 // Processa o corpo da função
                 int braceCount = 1;
+                
                 while (braceCount > 0) {
                     Token bodyTok = lexer.nextToken();
+                    
                     if (bodyTok.type == TokenType::END_OF_FILE) {
                         throw std::runtime_error("Erro: funcao nao termina com '}' (linha " + std::to_string(tok.line) + ")");
                     }
+                    
                     if (bodyTok.type == TokenType::LBRACE) braceCount++;
+                    
                     if (bodyTok.type == TokenType::RBRACE) braceCount--;
+                    
                     if (bodyTok.type == TokenType::ENDFUNCTIONS && braceCount > 0) {
                         throw std::runtime_error("Erro: funcao nao termina com '}' antes de ENDFUNCTIONS (linha " + std::to_string(tok.line) + ")");
                     }
                 }
+                
                 // Espera ENDFUNCTION após o corpo
                 Token endFuncTok = lexer.nextToken();
                 if (endFuncTok.type != TokenType::ENDFUNCTION) {
@@ -306,6 +411,7 @@ int main(int argc, char *argv[])
                 typeContext.popContext();
                 break;
             }
+        
         // ====== Parâmetros de Função ======
         case TokenType::PARAMTYPE:
             if (typeContext.currentContext() == TypeContext::Context::FUNCTION_PARAMS)
