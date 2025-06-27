@@ -152,8 +152,14 @@ void _generateTabFile(std::string base, SymbolTable symtab)
     tabOut.close();
 }
 
+// Lógica principal do compilador:
+// - Leitura do arquivo fonte
+// - Análise léxica e sintática
+// - Preenchimento da tabela de símbolos
+// - Geração dos arquivos .LEX e .TAB
 int main(int argc, char *argv[])
 {
+    // Verifica se o nome do arquivo foi passado como argumento
     if (argc < 2)
     {
         std::cerr << "Use: ./CangaCompiler <file_name>.251\n";
@@ -167,10 +173,12 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    // Lê todo o conteúdo do arquivo fonte para uma string
     std::stringstream buffer;
     buffer << ifs.rdbuf();
     std::string source = buffer.str();
 
+    // Inicializa o analisador léxico, tabela de símbolos e contexto de tipos
     Lexer lexer(source);
     SymbolTable symtab;
     TypeContext typeContext;
@@ -180,51 +188,65 @@ int main(int argc, char *argv[])
     bool isArray = false;
     std::string lastIdentifier;
 
+    // ===============================
+    //  Loop principal de análise
+    // ===============================
+    // Lê tokens um a um e executa ações conforme o tipo do token
     while (true)
     {
         Token tok = lexer.nextToken();
         if (tok.type == TokenType::END_OF_FILE)
             break;
 
+        // Switch principal para tratar cada tipo de token
         switch (tok.type)
         {
+        // ====== Seções e Contextos ======
         case TokenType::PROGRAM:
+            // Início do programa
             typeContext.pushContext(TypeContext::Context::GLOBAL);
             break;
         case TokenType::DECLARATIONS:
+            // Início da seção de declarações
             typeContext.pushContext(TypeContext::Context::DECLARATIONS);
             break;
         case TokenType::ENDDECLARATIONS:
+            // Fim da seção de declarações
             typeContext.popContext();
             break;
         case TokenType::FUNCTIONS:
+            // Início da seção de funções
             typeContext.pushContext(TypeContext::Context::FUNCTIONS);
             break;
         case TokenType::ENDFUNCTIONS:
+            // Fim da seção de funções
             typeContext.popContext();
             break;
         case TokenType::VARTYPE:
+            // Início de declaração de variáveis
             typeContext.pushContext(TypeContext::Context::VARIABLE_DECL);
             break;
+        // ====== Declaração de Função ======
         case TokenType::FUNCTYPE:
             typeContext.pushContext(TypeContext::Context::FUNCTION_DECL);
             {
-                
+                // Espera um tipo válido após FUNCTYPE
                 Token typeTok = lexer.nextToken();
                 if (typeTok.type != TokenType::REAL && typeTok.type != TokenType::INTEGER && typeTok.type != TokenType::STRING && typeTok.type != TokenType::BOOLEAN && typeTok.type != TokenType::CHARACTER && typeTok.type != TokenType::VOID) {
                     throw std::runtime_error("Erro: FUNCTYPE deve ser seguido de um tipo valido (linha " + std::to_string(tok.line) + ")");
                 }
-                
+                // Espera ':' após o tipo
                 Token colonTok = lexer.nextToken();
                 if (colonTok.type != TokenType::COLON) {
                     throw std::runtime_error("Erro: Esperado ':' apos o tipo na declaracao de função (linha " + std::to_string(tok.line) + ")");
                 }
-                
+                // Processa o nome da função, parâmetros e corpo
                 Token nextTok = lexer.nextToken();
                 do {
                     nextTok = lexer.nextToken();
                 } while (nextTok.type != TokenType::LPAREN && nextTok.type != TokenType::END_OF_FILE && nextTok.type != TokenType::ENDFUNCTIONS && nextTok.type != TokenType::LBRACE);
                 if (nextTok.type == TokenType::LPAREN) {
+                    // Processa parâmetros
                     while (true) {
                         Token paramTok = lexer.nextToken();
                         if (paramTok.type == TokenType::RPAREN) break;
@@ -250,6 +272,7 @@ int main(int argc, char *argv[])
                     }
                     nextTok = lexer.nextToken();
                 }
+                // Pula tokens até encontrar o início do corpo da função
                 while (nextTok.type != TokenType::LBRACE && nextTok.type != TokenType::END_OF_FILE && nextTok.type != TokenType::ENDFUNCTIONS) {
                     LexemeRecord skippedRecord;
                     skippedRecord.type = nextTok.type;
@@ -262,6 +285,7 @@ int main(int argc, char *argv[])
                 if (nextTok.type != TokenType::LBRACE) {
                     throw std::runtime_error("Erro: funcao nao possui corpo iniciado por '{' (linha " + std::to_string(tok.line) + ")");
                 }
+                // Processa o corpo da função
                 int braceCount = 1;
                 while (braceCount > 0) {
                     Token bodyTok = lexer.nextToken();
@@ -274,6 +298,7 @@ int main(int argc, char *argv[])
                         throw std::runtime_error("Erro: funcao nao termina com '}' antes de ENDFUNCTIONS (linha " + std::to_string(tok.line) + ")");
                     }
                 }
+                // Espera ENDFUNCTION após o corpo
                 Token endFuncTok = lexer.nextToken();
                 if (endFuncTok.type != TokenType::ENDFUNCTION) {
                     throw std::runtime_error("Erro: funcao deve terminar com ENDFUNCTION (linha " + std::to_string(tok.line) + ")");
@@ -281,6 +306,7 @@ int main(int argc, char *argv[])
                 typeContext.popContext();
                 break;
             }
+        // ====== Parâmetros de Função ======
         case TokenType::PARAMTYPE:
             if (typeContext.currentContext() == TypeContext::Context::FUNCTION_PARAMS)
             {
@@ -299,12 +325,14 @@ int main(int argc, char *argv[])
                 typeContext.popContext();
             }
             break;
+        // ====== Declaração de Arrays ======
         case TokenType::LBRACK:
             isArray = true;
             break;
         case TokenType::RBRACK:
             isArray = false;
             break;
+        // ====== Fim de Declaração ======
         case TokenType::SEMI:
             if (typeContext.currentContext() == TypeContext::Context::VARIABLE_DECL ||
                 typeContext.currentContext() == TypeContext::Context::FUNCTION_DECL)
@@ -312,24 +340,14 @@ int main(int argc, char *argv[])
                 typeContext.popContext();
             }
             break;
-        case TokenType::COLON:
-            if (typeContext.currentContext() == TypeContext::Context::VARIABLE_DECL)
-            {
-                break;
-            }
-            break;
-        case TokenType::COMMA:
-            if (typeContext.currentContext() == TypeContext::Context::VARIABLE_DECL)
-            {
-                break;
-            }
-            break;
+        // ====== Tipos de Variáveis ======
         case TokenType::REAL:
         case TokenType::INTEGER:
         case TokenType::STRING:
         case TokenType::BOOLEAN:
         case TokenType::CHARACTER:
         case TokenType::VOID:
+            // Atualiza o tipo atual para declaração
             currentType = tok.type;
             {
                 if (currentType != TokenType::VOID) {
@@ -350,10 +368,13 @@ int main(int argc, char *argv[])
                 }
             }
             break;
+        // ====== Constantes Booleanas ======
         case TokenType::TRUE:
         case TokenType::FALSE:
             break;
+        // ====== Identificadores ======
         case TokenType::IDENT: {
+            // Processa identificadores (variáveis, nomes de função, etc.)
             lastIdentifier = tok.lexeme;
             int idx = symtab.defineOrGet(tok.lexeme, tok.line, TokenType::IDENT);
 
@@ -434,13 +455,13 @@ int main(int argc, char *argv[])
             }
             break;
         }
+        // ====== Estrutura de Repetição WHILE ======
         case TokenType::WHILE: {
-            
+            // Processa a condição do WHILE (entre parênteses)
             Token nextTok = lexer.nextToken();
             if (nextTok.type != TokenType::LPAREN) {
                 throw std::runtime_error("Erro: WHILE deve ser seguido de '(' (linha " + std::to_string(tok.line) + ")");
             }
-            
             int parenCount = 1;
             while (parenCount > 0) {
                 Token condTok = lexer.nextToken();
@@ -449,17 +470,17 @@ int main(int argc, char *argv[])
                 }
                 if (condTok.type == TokenType::LPAREN) parenCount++;
                 if (condTok.type == TokenType::RPAREN) parenCount--;
-                
+                // Atualiza tabela de símbolos para identificadores na condição
                 if (condTok.type == TokenType::IDENT) {
                     symtab.defineOrGet(condTok.lexeme, condTok.line, TokenType::IDENT);
                 }
             }
-            
+            // Espera o início do bloco '{'
             Token braceTok = lexer.nextToken();
             if (braceTok.type != TokenType::LBRACE) {
                 throw std::runtime_error("Erro: WHILE deve ter bloco iniciado por '{' (linha " + std::to_string(tok.line) + ")");
             }
-            
+            // Processa o bloco do WHILE
             int braceCount = 1;
             while (braceCount > 0) {
                 Token bodyTok = lexer.nextToken();
@@ -468,7 +489,7 @@ int main(int argc, char *argv[])
                 }
                 if (bodyTok.type == TokenType::LBRACE) braceCount++;
                 if (bodyTok.type == TokenType::RBRACE) braceCount--;
-                
+                // Atualiza tabela de símbolos para identificadores no bloco
                 if (bodyTok.type == TokenType::IDENT) {
                     symtab.defineOrGet(bodyTok.lexeme, bodyTok.line, TokenType::IDENT);
                 }
@@ -479,12 +500,12 @@ int main(int argc, char *argv[])
                 record.line = bodyTok.line;
                 lexemes.push_back(record);
             }
-            
+            // Espera ENDWHILE após o bloco
             Token endWhileTok = lexer.nextToken();
             if (endWhileTok.type != TokenType::ENDWHILE) {
                 throw std::runtime_error("Erro: WHILE deve terminar com ENDWHILE (linha " + std::to_string(tok.line) + ")");
             }
-            
+            // Registra o token ENDWHILE
             LexemeRecord record;
             record.type = endWhileTok.type;
             record.lexeme = endWhileTok.lexeme;
@@ -495,6 +516,7 @@ int main(int argc, char *argv[])
         }
         }
 
+        // Registra cada token lido para o relatório .LEX
         LexemeRecord record;
         record.type = tok.type;
         record.lexeme = tok.lexeme;
@@ -503,6 +525,9 @@ int main(int argc, char *argv[])
         lexemes.push_back(record);
     }
 
+    // ===============================
+    //  Geração dos arquivos de saída
+    // ===============================
     _generateLexFile(filename.substr(0, filename.find_last_of('.')), lexemes);
     _generateTabFile(filename.substr(0, filename.find_last_of('.')), symtab);
 
