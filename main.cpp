@@ -209,7 +209,18 @@ int main(int argc, char *argv[])
         case TokenType::FUNCTYPE:
             typeContext.pushContext(TypeContext::Context::FUNCTION_DECL);
             {
-                Token nextTok;
+                
+                Token typeTok = lexer.nextToken();
+                if (typeTok.type != TokenType::REAL && typeTok.type != TokenType::INTEGER && typeTok.type != TokenType::STRING && typeTok.type != TokenType::BOOLEAN && typeTok.type != TokenType::CHARACTER && typeTok.type != TokenType::VOID) {
+                    throw std::runtime_error("Erro: FUNCTYPE deve ser seguido de um tipo valido (linha " + std::to_string(tok.line) + ")");
+                }
+                
+                Token colonTok = lexer.nextToken();
+                if (colonTok.type != TokenType::COLON) {
+                    throw std::runtime_error("Erro: Esperado ':' apos o tipo na declaracao de função (linha " + std::to_string(tok.line) + ")");
+                }
+                
+                Token nextTok = lexer.nextToken();
                 do {
                     nextTok = lexer.nextToken();
                 } while (nextTok.type != TokenType::LPAREN && nextTok.type != TokenType::END_OF_FILE && nextTok.type != TokenType::ENDFUNCTIONS && nextTok.type != TokenType::LBRACE);
