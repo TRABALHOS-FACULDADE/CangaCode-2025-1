@@ -90,9 +90,9 @@ void _teamHeader(std::ofstream &stream)
 {
     stream << "Código da Equipe: 2" << std::endl
            << "Componentes:" << std::endl
-           << "    Davih de Andrade Machado Borges Santos; _@aln.senaicimatec.edu.br" << std::endl
+           << "    Davih de Andrade Machado Borges Santos; davih.santos@ba.estudante.senai.br" << std::endl
            << "    Felipe Azevedo Ribeiro; felipe.r@aln.senaicimatec.edu.br" << std::endl
-           << "    Gabriel Trindade Santana; _@aln.senaicimatec.edu.br" << std::endl
+           << "    Gabriel Trindade Santana; gabriel.t.santana@ba.estudante.senai.br" << std::endl
            << "    Pedro Quadros de Freitas; _@aln.senaicimatec.edu.br" << std::endl
            << std::endl;
 }
